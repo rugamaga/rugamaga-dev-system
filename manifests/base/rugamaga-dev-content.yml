@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rugamaga-dev-content
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.global-static-ip-name: global-ip-rugamaga-dev
+    networking.gke.io/managed-certificates: rugamaga-dev-certificate
+  labels:
+    app: rugamaga-dev-content
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: rugamaga-dev-content
+          servicePort: 80
+---
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: rugamaga-dev-certificate
+spec:
+  domains:
+    - example.com

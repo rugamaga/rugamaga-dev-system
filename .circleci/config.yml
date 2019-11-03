@@ -1,0 +1,98 @@
+version: 2
+
+anchors:
+  - &prd
+    environment:
+      META_GCLOUD_SERVICE_KEY: ${PRD_GCLOUD_SERVICE_KEY}
+      GOOGLE_CLOUD_KEYFILE_JSON: .credentials/kubernetes@rugamaga-dev.json
+      GCP_PROJECT_ID: rugamaga-dev
+      CLUSTER_NAME: gke-rugamaga-dev
+      CLUSTER_ZONE: asia-northeast1
+      KUSTOMIZATION_ENV: prd
+      PRUNE_LABEL: rugamaga-dev-system
+
+  - &defaults
+    docker:
+      - image: google/cloud-sdk:268.0.0
+
+  - &diff
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: create credential file for gcloud
+          command: eval echo $META_GCLOUD_SERVICE_KEY > $GOOGLE_CLOUD_KEYFILE_JSON
+      - run:
+          name: activate credential file for gcloud
+          command: gcloud auth activate-service-account --key-file $GOOGLE_CLOUD_KEYFILE_JSON
+      - run:
+          name: set project for gcloud
+          command: gcloud config set project ${GCP_PROJECT_ID}
+      - run:
+          name: get credentials for kubectl by using gcloud
+          command: gcloud container clusters get-credentials --zone ${CLUSTER_ZONE} ${CLUSTER_NAME}
+      - run:
+          name: Generate kustomization.yml
+          command: manifests/kustomization.sh > manifests/kustomization.yml
+      - run:
+          name: Show manifests diff
+          command: |
+            # kubectl diffは、差分がなくエラーもないときに0を返し
+            # 差分があるか、エラーがあるときには1を返す
+            # 1. 差分がでるだけでCircleCIとしてJobFailになるのは不味い
+            # 2. しかしエラーがあるときにJobSuccessになるのも不味い
+            # そこでエラーを事前にkubectl apply --server-dry-runによって検出し
+            # diffはその後set +e(1が帰ってきても失敗扱いしない)で実行する。
+            kubectl apply -k manifests/ --server-dry-run --prune -l pruneLabel=${PRUNE_LABEL}
+            # ここまできたらエラーがあってもなくても強制的に成功扱いする
+            set +e
+            kubectl diff -k manifests/
+            exit 0
+
+  - &apply
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: create credential file for gcloud
+          command: eval echo $META_GCLOUD_SERVICE_KEY > $GOOGLE_CLOUD_KEYFILE_JSON
+      - run:
+          name: activate credential file for gcloud
+          command: gcloud auth activate-service-account --key-file $GOOGLE_CLOUD_KEYFILE_JSON
+      - run:
+          name: set project for gcloud
+          command: gcloud config set project ${GCP_PROJECT_ID}
+      - run:
+          name: get credentials for kubectl by using gcloud
+          command: gcloud container clusters get-credentials --zone ${CLUSTER_ZONE} ${CLUSTER_NAME}
+      - run:
+          name: Generate kustomization.yml
+          command: manifests/kustomization.sh > manifests/kustomization.yml
+      - run:
+          name: Apply manifests
+          command: kubectl apply -k manifests/ --prune -l pruneLabel=${PRUNE_LABEL}
+
+jobs:
+  diff_prd:
+    <<: *prd
+    <<: *diff
+
+  apply_prd:
+    <<: *prd
+    <<: *apply
+
+workflows:
+  version: 2
+
+  diff:
+    jobs:
+      - diff_prd
+
+  prd:
+    jobs:
+      - apply_prd:
+          filters:
+            tags:
+              only: /^PRD\/v.*$/
+            branches:
+              ignore: /.*/

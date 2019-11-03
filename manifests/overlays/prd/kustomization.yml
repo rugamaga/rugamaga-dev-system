@@ -1,0 +1,18 @@
+bases:
+  - ../../base
+patchesStrategicMerge:
+  - imager-managed-certificate.yml
+  - rugamaga-dev-managed-certificate.yml
+patchesJson6902:
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: imager
+    path: imager-ingress-patch.yml
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: rugamaga-dev-content
+    path: rugamaga-dev-ingress-patch.yml

@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: imager
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.global-static-ip-name: global-ip-image-rugamaga-dev
+    networking.gke.io/managed-certificates: imager-certificate
+  labels:
+    app: imager
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /api
+        backend:
+          serviceName: imager-server
+          servicePort: 80
+      - path: /*
+        backend:
+          serviceName: imager-client
+          servicePort: 80
+---
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: imager-certificate
+spec:
+  domains:
+    - example.com
