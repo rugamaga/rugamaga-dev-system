@@ -16,7 +16,7 @@ spec:
       - path: /*
         backend:
           serviceName: perversion-world-bbs
-          servicePort: 80
+          servicePort: 4567
 ---
 apiVersion: networking.gke.io/v1beta1
 kind: ManagedCertificate
