@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: perversion-world-bbs
+spec:
+  domains:
+    - perversion-world-bbs.rugamaga.dev
