@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: perversion-bbs
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.global-static-ip-name: global-ip-perversion-bbs-rugamaga-dev
+    networking.gke.io/managed-certificates: perversion-bbs-certificate
+  labels:
+    app: perversion-bbs
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: perversion-bbs
+          servicePort: 80
+---
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: perversion-bbs-certificate
+spec:
+  domains:
+    - example.com

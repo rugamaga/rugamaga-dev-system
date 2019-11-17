@@ -1,3 +1,4 @@
 resources:
   - ./imager.yml
   - ./rugamaga-dev-content.yml
+  - ./perversion-bbs.yml
