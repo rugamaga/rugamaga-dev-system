@@ -13,15 +13,7 @@ spec:
   - host: example.com
     http:
       paths:
-      - path: /images/*
-        backend:
-          serviceName: imager-server
-          servicePort: 80
-      - path: /thumbnails/*
-        backend:
-          serviceName: imager-server
-          servicePort: 80
-      - path: /tags/*
+      - path: /api/*
         backend:
           serviceName: imager-server
           servicePort: 80
