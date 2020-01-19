@@ -3,7 +3,6 @@ bases:
 patchesStrategicMerge:
   - imager-managed-certificate.yml
   - rugamaga-dev-managed-certificate.yml
-  - perversion-world-bbs-managed-certificate.yml
 patchesJson6902:
   - target:
       group: extensions
@@ -17,9 +16,3 @@ patchesJson6902:
       kind: Ingress
       name: rugamaga-dev-content
     path: rugamaga-dev-ingress-patch.yml
-  - target:
-      group: extensions
-      version: v1beta1
-      kind: Ingress
-      name: perversion-world-bbs
-    path: perversion-world-bbs-ingress-patch.yml
